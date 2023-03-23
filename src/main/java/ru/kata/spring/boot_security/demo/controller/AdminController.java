@@ -29,6 +29,7 @@ public class AdminController {
     @GetMapping("/users")
     public String findAll(ModelMap model, User user, Principal principal) {
         model.addAttribute("users", userService.allUsers(user));
+        model.addAttribute("roles", roleService.getAll());
         model.addAttribute("authUser", userService.findByUserName(principal.getName()));
         return "users";
     }
@@ -78,22 +79,19 @@ public class AdminController {
         return "redirect:/users";
     }
 
-    @GetMapping(value = "user/edit/{id}")
-    public String edit(ModelMap model, @ModelAttribute(value = "id") Long id,
-                       Principal principal) {
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("roles", roleService.getAll());
-        model.addAttribute("authUser", userService.findByUserName(principal.getName()));
-        return "userUpdateForm";
-    }
 
     @PutMapping(value = "user/update/{id}")
     public String updateUser(@ModelAttribute(value = "user")@Valid User user,
-                             BindingResult bindingResult) {
+                             BindingResult bindingResult,
+                             ModelMap model,
+                             Principal principal) {
             if(bindingResult.hasErrors()) {
-                return "userUpdateForm";
+                model.addAttribute("roles", roleService.getAll());
+                model.addAttribute("authUser", userService.findByUserName(principal.getName()));
+                return "redirect:/users";
             }
-
+        model.addAttribute("roles", roleService.getAll());
+        model.addAttribute("authUser", userService.findByUserName(principal.getName()));
         userService.update(user);
         return "redirect:/users";
     }
